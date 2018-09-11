@@ -557,12 +557,7 @@ class StreamCinemaContentProvider(ContentProvider):
         #menu.update({"run Schedule": {"action": "subs"}})
         #menu.update({"test": {"action": "test"}})
         #menu.update({"last": {'cp': 'czsklib', 'list': 'http://stream-cinema.online/json/movies-a-z'}})
-        menu.update({
-            "EPG": {
-                "action": "epg"
-            }
-        })
-
+        menu.update({"EPG": {"action": "epg"}})
 
         item['menu'] = menu
         return item

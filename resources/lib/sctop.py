@@ -415,14 +415,18 @@ def checkSupportHTTPS(url):
         pass
     return False
 
+
 def time_usage(func):
     def wrapper(*args, **kwargs):
         beg_ts = time.time()
         retval = func(*args, **kwargs)
         end_ts = time.time()
-        util.info('[SC] func: [%s] - time: %f' % (func.__name__, end_ts - beg_ts))
+        util.info(
+            '[SC] func: [%s] - time: %f' % (func.__name__, end_ts - beg_ts))
         return retval
+
     return wrapper
+
 
 try:
     from storagecache import StorageCache

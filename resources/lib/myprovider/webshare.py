@@ -134,10 +134,18 @@ class Webshare():
                     return False
                 # create hashes
                 password = hashlib.sha1(
-                    md5crypt(self.password.encode('utf-8'), salt.encode('utf-8'))).hexdigest()
-                digest = hashlib.md5(self.username.encode('utf-8') + ':Webshare:' +
-                                     self.password.encode('utf-8')).hexdigest()
-                util.debug('[SC] pass: %s | [%s] digest: %s' % (password, str(md5crypt(self.password.encode('utf-8'), salt.encode('utf-8'))), digest))
+                    md5crypt(
+                        self.password.encode('utf-8'),
+                        salt.encode('utf-8'))).hexdigest()
+                digest = hashlib.md5(
+                    self.username.encode('utf-8') + ':Webshare:' +
+                    self.password.encode('utf-8')).hexdigest()
+                util.debug('[SC] pass: %s | [%s] digest: %s' %
+                           (password,
+                            str(
+                                md5crypt(
+                                    self.password.encode('utf-8'),
+                                    salt.encode('utf-8'))), digest))
                 # login
                 headers, req = self._create_request(
                     '', {
