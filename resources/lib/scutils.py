@@ -83,6 +83,7 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
         util.info('--------------------------------------------------------')
 
     @bug.buggalo_try_except({'method': 'scutils.run'})
+    @sctop.time_usage
     def run(self, params):
         if params == {} or params == self.params():
             return self.root()
@@ -451,9 +452,10 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
             params['title'] = what
             url = sctop._create_plugin_url(params,
                                            'plugin://%s/' % sctop.__scriptid__)
-            #self.endOfDirectory(succeeded=False, cacheToDisc=False)
-            xbmc.executebuiltin('Container.Update(%s,true)' % url)
-            #self.list(self.provider.search(what, params['id']))
+            #self.endOfDirectory(succeeded=True, cacheToDisc=False)
+            #xbmc.executebuiltin('Container.Update(%s,true)' % url)
+            self.list(self.provider.search(params['csearch'], params['id']))
+            return self.endOfDirectory(cacheToDisc=False)
         else:
             out = [{
                 'title': '#',
@@ -661,6 +663,7 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
             worker.start()
 
     @bug.buggalo_try_except({'method': 'scutils.run_custom'})
+    @sctop.time_usage
     def run_custom(self, params):
         util.debug("RUN CUSTOM: %s" % str(params))
         trakt_user = params['tu'] if 'tu' in params else 'me'
@@ -802,6 +805,9 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
 
             if action == 'authTrakt':
                 trakt.authTrakt()
+            if action == 'epg':
+                epg = sctop.request('https://raw.githubusercontent.com/Lunatixz/KODI_Addons/master/script.module.uepg/resources/example.json') #'[{"channelname":"AMC","channelnumber":"-1","channellogo":"http:\/\/services.data.tvprofi.cz\/images\/logo\/web-36x20\/mgm.png","isfavorite":false,"guidedata":[{"url":"","starttime":"1536294900","endtime":"1536300309","runtime":"5409","label":"Zelvi nindzove","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/g5Z3SXrRkQFSfHXTe1BSn7oM5qA.jpg"}]},{"url":"","starttime":"1536300900","endtime":"1536306307","runtime":"5407","label":"Ambiciozni blondynka","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/gGy0TvLSjqItOgLcqV1PC4ORk0U.jpg"}]},{"url":"","starttime":"1536306600","endtime":"1536312797","runtime":"6197","label":"Mily Johne","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/2Fen9XsCscjupGJUhi2zaCvOaGd.jpg"}]},{"url":"","starttime":"1536319200","endtime":"1536324146","runtime":"4946","label":"Hleda se Jackie Chan","label2":"720p","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/j8fR9N1PmCLAJdW5ofwqYOMaXKf.jpg"}]},{"url":"","starttime":"1536324900","endtime":"1536331098","runtime":"6198","label":"Durhamsti Byci","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/wZwXLiR1cisTXaJiuBLvgkS5HWw.jpg"}]},{"url":"","starttime":"1536331500","endtime":"1536336907","runtime":"5407","label":"Ambiciozni blondynka","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/gGy0TvLSjqItOgLcqV1PC4ORk0U.jpg"}]},{"url":"","starttime":"1536344400","endtime":"1536349970","runtime":"5570","label":"Sexy party 2","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/sGX7RUBhf9i8nI3cfGHISDnAna0.jpg"}]},{"url":"","starttime":"1536359100","endtime":"1536364968","runtime":"5868","label":"Svitani","label2":"SD","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/tlUvt6PMP4maUalDaMc7w1e6vak.jpg"}]},{"url":"","starttime":"1536369900","endtime":"1536374778","runtime":"4878","label":"South Park: Peklo na Zemi","label2":"1080p","art":[{"thumb":"http:\/\/image.tmdb.org\/t\/p\/original\/3ffIyRixcMxzSVTivwyy585N9lH.jpg"}]}]}]'
+                xbmc.executebuiltin("RunScript(script.module.uepg,json=%s&refresh_path=%s&refresh_interval=%s&row_count=%s)"%(urllib.quote_plus(json.dumps(epg)),urllib.quote_plus(json.dumps(sys.argv[0]+"?mode=20")),urllib.quote_plus(json.dumps("7200")),urllib.quote_plus(json.dumps("5"))))
             if action == 'speedtest':  #                               1:350    2:500    3:750  4:1000 5:1500   6:2000   7:2500 8:3000  9:3500   10:4000
                 g = sctop.getString
                 x = [
@@ -1304,6 +1310,7 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
             title, params, item['img'], infoLabels=item, menuItems=menuItems)
 
     @bug.buggalo_try_except({'method': 'scutils.getTaraktLastActitivy'})
+    @sctop.time_usage
     def getTraktLastActivity(self, typ='movie'):
         res = []
         try:
@@ -1463,10 +1470,10 @@ class KODISCLib(xbmcprovider.XBMCMultiResolverContentProvider):
 
     def _player(self):
         try:
+            playTime = sctop.player.getTime() if sctop.player.isPlayingVideo() else 0
             if not xbmc.abortRequested and sctop.player.isPlayingVideo(
-            ) and sctop.player.scid > 0:
+            ) and sctop.player.scid > 0 and playTime > 60:
                 notificationtime = 30
-                playTime = sctop.player.getTime()
                 totalTime = sctop.player.getTotalTime()
                 sctop.player.watchedTime = playTime
                 self.timer += 1

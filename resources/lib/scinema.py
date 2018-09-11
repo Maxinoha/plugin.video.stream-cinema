@@ -37,6 +37,7 @@ import xbmcgui
 import xbmcplugin
 import xbmc
 import sctop
+import time
 import trakt
 import tracker
 import traceback
@@ -121,6 +122,7 @@ class StreamCinemaContentProvider(ContentProvider):
         return nurl
 
     @bug.buggalo_try_except({'method': 'scinema._json'})
+    @sctop.time_usage
     def _json(self, url, post=False):
         try:
             return json.loads(self.get_data_cached(url, post))
@@ -130,6 +132,7 @@ class StreamCinemaContentProvider(ContentProvider):
         return None
 
     @bug.buggalo_try_except({'method': 'scinema.items'})
+    @sctop.time_usage
     def items(self, url=None, data=None):
         self.subs = self.getSubs()
         if data is None and url is not None:
@@ -158,7 +161,11 @@ class StreamCinemaContentProvider(ContentProvider):
         #util.debug('--------------------- DONE -----------------')
         return result
 
+    def filter(self, filter):
+        pass
+
     @bug.buggalo_try_except({'method': 'scinema.system'})
+    @sctop.time_usage
     def system(self, data, cl=False):
         util.debug("[SC] SYSYEM CL: %s" % str(cl))
         if cl is False and "setContent" in data:
@@ -239,6 +246,7 @@ class StreamCinemaContentProvider(ContentProvider):
         return self.list(self._url(''))
 
     @bug.buggalo_try_except({'method': 'scinema.list'})
+    @sctop.time_usage
     def list(self, url):
         self.base_url = self._url(url)
         return self.items(url)
@@ -248,6 +256,7 @@ class StreamCinemaContentProvider(ContentProvider):
             "Container.Update(plugin://%s)" % (sctop.__scriptid__))
 
     @bug.buggalo_try_except({'method': 'scinema.get_data_cached'})
+    @sctop.time_usage
     def get_data_cached(self, url, post=False):
         try:
             url.index('/json/')
@@ -548,6 +557,12 @@ class StreamCinemaContentProvider(ContentProvider):
         #menu.update({"run Schedule": {"action": "subs"}})
         #menu.update({"test": {"action": "test"}})
         #menu.update({"last": {'cp': 'czsklib', 'list': 'http://stream-cinema.online/json/movies-a-z'}})
+        menu.update({
+            "EPG": {
+                "action": "epg"
+            }
+        })
+
 
         item['menu'] = menu
         return item
